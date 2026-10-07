@@ -7,6 +7,8 @@ const secondsElement = document.getElementById("seconds");
 
 const targetTimestamp = Date.parse(targetTime);
 
+let countdownTimer = null;
+
 function calculateRemainingTime() {
     const remaining = targetTimestamp - Date.now();
 
@@ -37,9 +39,14 @@ function updateCountdown() {
     minutesElement.textContent = String(remaining.minutes).padStart(2, "0");
     secondsElement.textContent = String(remaining.seconds).padStart(2, "0");
 
-    console.log("Remaining:", remaining);
+    if (targetTimestamp - Date.now() <= 0) {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+    }
 }
 
 updateCountdown();
 
-setInterval(updateCountdown, 1000);
+if (targetTimestamp > Date.now()) {
+    countdownTimer = setInterval(updateCountdown, 1000);
+}
