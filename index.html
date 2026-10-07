@@ -3,90 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Landing Page</title>
+    <title>Tech Innovation Summit 2026</title>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <a href="#main">Skip to Content</a>
+    <a class="skip-link" href="#main">Skip to Content</a>
 
-    <header>
-        <h1>Event Landing Page</h1>
-        <p>Join us for an upcoming event.</p>
+    <header class="site-header">
+        <div class="container">
+            <p class="event-label">TECH INNOVATION SUMMIT 2026</p>
+            <h1>Build the Future with Technology</h1>
+            <p class="event-description">
+                Join developers, designers, and technology enthusiasts
+                for a day of innovation, learning, and collaboration.
+            </p>
+        </div>
     </header>
 
     <main id="main">
-        <section aria-labelledby="countdown-heading">
-            <h2 id="countdown-heading">Event Countdown</h2>
+        <section class="countdown-section" aria-labelledby="countdown-heading">
+            <div class="container">
+                <p class="section-label">EVENT STARTS IN</p>
+                <h2 id="countdown-heading">Countdown</h2>
 
-            <div id="countdown-container">
-                <p>
-                    <span id="days">00</span> Days
-                </p>
-                <p>
-                    <span id="hours">00</span> Hours
-                </p>
-                <p>
-                    <span id="minutes">00</span> Minutes
-                </p>
-                <p>
-                    <span id="seconds">00</span> Seconds
-                </p>
+                <div class="countdown-container" id="countdown-container">
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="days">00</span>
+                        <span class="countdown-label">Days</span>
+                    </div>
+
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="hours">00</span>
+                        <span class="countdown-label">Hours</span>
+                    </div>
+
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="minutes">00</span>
+                        <span class="countdown-label">Minutes</span>
+                    </div>
+
+                    <div class="countdown-item">
+                        <span class="countdown-value" id="seconds">00</span>
+                        <span class="countdown-label">Seconds</span>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section aria-labelledby="registration-heading">
-            <h2 id="registration-heading">Registration</h2>
-
-            <form id="registration-form">
-                <div>
-                    <label for="name">Name</label>
-                    <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        autocomplete="name"
-                        required
-                    >
+        <section class="registration-section" aria-labelledby="registration-heading">
+            <div class="container registration-container">
+                <div class="registration-intro">
+                    <p class="section-label">RESERVE YOUR SPOT</p>
+                    <h2 id="registration-heading">Register for the Event</h2>
+                    <p>
+                        Complete the form to reserve your place at
+                        Tech Innovation Summit 2026.
+                    </p>
                 </div>
 
-                <div>
-                    <label for="email">Email</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        autocomplete="email"
-                        required
-                    >
-                </div>
+                <form class="registration-form" id="registration-form">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            autocomplete="name"
+                            placeholder="Enter your name"
+                            required
+                        >
+                    </div>
 
-                <div>
-                    <label for="message">Message</label>
-                    <textarea
-                        id="message"
-                        name="message"
-                        rows="5"
-                    ></textarea>
-                </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="email"
+                            placeholder="you@example.com"
+                            required
+                        >
+                    </div>
 
-                <button type="submit">Register</button>
-            </form>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea
+                            id="message"
+                            name="message"
+                            rows="5"
+                            placeholder="Tell us why you are interested in the event."
+                        ></textarea>
+                    </div>
+
+                    <button class="submit-button" type="submit">
+                        Register Now
+                    </button>
+                </form>
+            </div>
         </section>
 
-        <section aria-labelledby="status-heading">
-            <h2 id="status-heading">Status</h2>
-
-            <p
-                id="status-feedback"
-                role="status"
-                aria-live="polite"
-            >
-                Ready for registration.
-            </p>
+        <section class="status-section" aria-labelledby="status-heading">
+            <div class="container">
+                <div class="status-banner" id="status-banner">
+                    <h2 id="status-heading">Registration Status</h2>
+                    <p
+                        id="status-feedback"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        Ready for registration.
+                    </p>
+                </div>
+            </div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2026 Event Landing Page</p>
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 Tech Innovation Summit. All rights reserved.</p>
+        </div>
     </footer>
 </body>
 </html>
