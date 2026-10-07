@@ -38,6 +38,17 @@ const registrationForm = document.getElementById("registration-form");
 const submitButton = registrationForm.querySelector("button[type='submit']");
 const statusFeedback = document.getElementById("status-feedback");
 
+function sanitizeInput(str) {
+    const text = String(str);
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function updateFormUI() {
     const isSubmitting = currentFormState === FORM_STATES.SUBMITTING;
 
@@ -152,6 +163,20 @@ registrationForm.addEventListener("submit", async (event) => {
         return;
     }
 
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const messageInput = document.getElementById("message");
+
+    const sanitizedName = sanitizeInput(nameInput.value);
+    const sanitizedEmail = sanitizeInput(emailInput.value);
+    const sanitizedMessage = sanitizeInput(messageInput.value);
+
+    submissionContract.input.name = sanitizedName;
+    submissionContract.input.email = sanitizedEmail;
+    submissionContract.input.message = sanitizedMessage;
+
+    console.log("Sanitized input:", submissionContract.input);
+
     lockSubmission();
 
     try {
@@ -182,4 +207,5 @@ window.getFormState = getFormState;
 window.getSubmissionLock = getSubmissionLock;
 window.mockApiSubmit = mockApiSubmit;
 window.lockSubmission = lockSubmission;
-window.unlockSubmission = unlockSubmission;*/
+window.unlockSubmission = unlockSubmission;
+window.sanitizeInput = sanitizeInput;*/
