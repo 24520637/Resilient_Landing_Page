@@ -7,7 +7,7 @@ const secondsElement = document.getElementById("seconds");
 
 const targetTimestamp = Date.parse(targetTime);
 
-let countdownTimer = null;
+let intervalId = null;
 
 function calculateRemainingTime() {
     const remaining = targetTimestamp - Date.now();
@@ -32,21 +32,35 @@ function calculateRemainingTime() {
 }
 
 function updateCountdown() {
+    const remainingMilliseconds = targetTimestamp - Date.now();
+
+    // 1. Kiểm tra nếu đã hết giờ -> Hủy interval và dọn dẹp bộ nhớ
+    if (remainingMilliseconds <= 0) {
+        clearInterval(intervalId);
+        intervalId = null;
+
+        daysElement.textContent = "00";
+        hoursElement.textContent = "00";
+        minutesElement.textContent = "00";
+        secondsElement.textContent = "00";
+
+        console.log("Countdown completed. intervalId canceled:", intervalId);
+        return;
+    }
+
+    // 2. Tính toán và cập nhật thời gian thực
     const remaining = calculateRemainingTime();
 
     daysElement.textContent = String(remaining.days).padStart(2, "0");
     hoursElement.textContent = String(remaining.hours).padStart(2, "0");
     minutesElement.textContent = String(remaining.minutes).padStart(2, "0");
     secondsElement.textContent = String(remaining.seconds).padStart(2, "0");
-
-    if (targetTimestamp - Date.now() <= 0) {
-        clearInterval(countdownTimer);
-        countdownTimer = null;
-    }
 }
 
+// Chạy lần đầu tiên ngay khi tải trang
 updateCountdown();
 
+// Bắt đầu vòng lặp đếm ngược nếu mốc thời gian còn ở tương lai
 if (targetTimestamp > Date.now()) {
-    countdownTimer = setInterval(updateCountdown, 1000);
+    intervalId = setInterval(updateCountdown, 1000);
 }
