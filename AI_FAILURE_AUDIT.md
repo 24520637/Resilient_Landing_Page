@@ -2,17 +2,21 @@
 
 ## 1. Form Layout Error - Missing `.form-group`
 
-### Defect Description
+### 1. Defect Description
 
-The AI omitted `.form-group` wrappers, causing labels and form controls to cluster inline instead of forming a vertical layout.
+The AI omitted `.form-group` wrappers around the form controls, causing labels and form controls to cluster inline instead of forming a clear vertical layout.
 
-### Diagnostic Method
+### 2. Diagnostic Method
 
-Detected in **Chrome DevTools → Elements** by inspecting `#registration-form`. The missing `.form-group` structure was also confirmed with `git diff`.
+Inspected `#registration-form` using **Chrome DevTools → Elements** and confirmed that the `.form-group` wrapper structure was missing.
 
-### Refactored Solution
+The issue was also verified through **Git diff inspection**.
 
-**`index.html`**
+### 3. Refactored Solution
+
+Added `.form-group` wrappers around each label and form control and applied a vertical Flexbox layout.
+
+#### `index.html`
 
 ```html
 <form id="registration-form" class="registration-form">
@@ -37,7 +41,7 @@ Detected in **Chrome DevTools → Elements** by inspecting `#registration-form`.
 </form>
 ```
 
-**`css/styles.css`**
+#### `css/styles.css`
 
 ```css
 .registration-form {
@@ -63,17 +67,21 @@ Detected in **Chrome DevTools → Elements** by inspecting `#registration-form`.
 
 ## 2. Missing `:focus-visible`
 
-### Defect Description
+### 1. Defect Description
 
-The AI did not provide a visible keyboard focus indicator, making it difficult to identify the currently focused element.
+The AI did not provide a visible keyboard focus indicator. As a result, keyboard users could not clearly identify which interactive element currently had focus.
 
-### Diagnostic Method
+### 2. Diagnostic Method
 
-Used **Chrome DevTools → Elements** and pressed `Tab` to check keyboard focus. The missing `:focus-visible` rule was also confirmed with `git diff`.
+Used **Chrome DevTools → Elements** and pressed `Tab` to navigate through the form. The focused element did not have a visible focus indicator.
 
-### Refactored Solution
+The absence of the `:focus-visible` CSS rule was also confirmed through **Git diff inspection**.
 
-**`css/styles.css`**
+### 3. Refactored Solution
+
+Added a visible `:focus-visible` outline for interactive elements.
+
+#### `css/styles.css`
 
 ```css
 :focus-visible {
@@ -94,24 +102,34 @@ a:focus-visible {
 
 ## 3. Broken Frame at 375px
 
-### Defect Description
+### 1. Defect Description
 
-The AI-generated responsive layout allowed elements to exceed the viewport width, causing horizontal overflow and a broken mobile frame at 375px.
+The AI-generated responsive layout allowed elements to exceed the viewport width, causing horizontal overflow and breaking the mobile layout at `375px`.
 
-### Diagnostic Method
+### 2. Diagnostic Method
 
-Used **Chrome DevTools → Device Mode** at `375px` and checked:
+Used **Chrome DevTools → Device Mode** with the viewport set to `375px`.
+
+Verified horizontal overflow using:
 
 ```javascript
 document.documentElement.scrollWidth <=
 document.documentElement.clientWidth
 ```
 
-Expected result: `true`.
+The expected result is:
 
-### Refactored Solution
+```text
+true
+```
 
-**`css/styles.css`**
+The responsive layout was also inspected through **Git diff inspection**.
+
+### 3. Refactored Solution
+
+Added `min-width: 0`, `max-width: 100%`, `box-sizing: border-box`, and a responsive single-column layout for screens up to `375px`.
+
+#### `css/styles.css`
 
 ```css
 .registration-container {
@@ -145,51 +163,50 @@ Expected result: `true`.
     }
 }
 ```
-1. Error Name
 
-Redundant UI State Overwrite / Multiple Unnecessary DOM Renders
+---
 
-2. Error Description
+## 4. Redundant UI State Overwrite / Multiple Unnecessary DOM Renders
 
-In the submit event handler, the try/catch block directly assigns statusFeedback.textContent immediately after transitionTo():
+### 1. Defect Description
 
+The AI directly assigned `statusFeedback.textContent` immediately after calling `transitionTo()`:
+
+```javascript
 transitionTo(FORM_STATES.SUCCESS);
 
 statusFeedback.textContent =
     "Registration submitted successfully.";
+```
 
 and:
 
+```javascript
 transitionTo(FORM_STATES.ERROR);
 
 statusFeedback.textContent =
     "Something went wrong. Please try again.";
+```
 
-This is redundant because transitionTo() already calls:
+This is redundant because `transitionTo()` already calls `updateFormUI()`, which updates `statusFeedback.textContent` based on the current form state.
 
-updateFormUI();
+The `finally` block then calls:
 
-and updateFormUI() already updates statusFeedback.textContent according to the current form state.
-
-Afterward, the finally block calls:
-
+```javascript
 unlockSubmission();
+```
 
-which also calls:
+which also calls `updateFormUI()`.
 
-updateFormUI();
+Therefore, the submit flow performs unnecessary UI updates and creates multiple competing locations responsible for rendering the status message.
 
-Therefore, the UI is unnecessarily rendered multiple times during one submission flow. The manual textContent assignments also violate the Single Source of Truth principle because updateFormUI() should be the centralized owner of UI state rendering.
+### 2. Diagnostic Method
 
-3. Error Identification Method
-A. Tracing Call Stack
+Used **Git diff inspection** to identify the direct `statusFeedback.textContent` assignments outside `updateFormUI()`.
 
-Temporarily add:
+Also added a temporary breakpoint/log at the beginning of `updateFormUI()`:
 
-console.log("Render UI");
-
-at the beginning of updateFormUI():
-
+```javascript
 function updateFormUI() {
     console.log("Render UI");
 
@@ -197,64 +214,28 @@ function updateFormUI() {
 
     // ...
 }
+```
 
-Submit the form once and observe the Console.
+Submitting the form showed that `updateFormUI()` was triggered by multiple state-management functions.
 
-The updateFormUI() function is triggered by:
+A dynamic message test was also used:
 
-transitionTo(FORM_STATES.SUBMITTING)
-lockSubmission()
-transitionTo(FORM_STATES.SUCCESS) or transitionTo(FORM_STATES.ERROR)
-unlockSubmission()
-
-The SUCCESS/ERROR path additionally performs a direct statusFeedback.textContent assignment outside updateFormUI().
-
-This demonstrates unnecessary UI updates rather than a single centralized rendering path.
-
-B. Dynamic Message Overwrite Test
-
-Modify the mock API response:
-
+```javascript
 resolve({
     success: true,
     message: "Dynamic API success message."
 });
+```
 
-Then assign:
+When `statusFeedback.textContent = result.message` was assigned in the `try` block, the message was subsequently overwritten by `updateFormUI()`.
 
-statusFeedback.textContent = result.message;
+### 3. Refactored Solution
 
-inside the try block.
+Removed the redundant direct DOM assignments from the `try/catch` block and kept `updateFormUI()` as the single source of truth for UI rendering.
 
-The message is subsequently overwritten when:
+#### Refactored Submit Handler
 
-finally {
-    unlockSubmission();
-}
-
-calls:
-
-updateFormUI();
-
-which restores the default SUCCESS message.
-
-This demonstrates that direct DOM manipulation outside updateFormUI() can be immediately overwritten.
-
-4. Impact Level
-
-Medium
-
-Impact
-Creates a code smell through redundant DOM updates.
-Violates the Single Source of Truth principle.
-Performs unnecessary DOM calculations/renders.
-Makes future dynamic API messages harder to maintain.
-Creates competing responsibilities between the submit handler and updateFormUI().
-5. Modified Code (Refactored Code)
-
-Remove the redundant statusFeedback.textContent assignments from the try/catch block.
-
-Refactored submit handler
+```javascript
 registrationForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -304,20 +285,16 @@ registrationForm.addEventListener("submit", async (event) => {
         unlockSubmission();
     }
 });
-Result
+```
 
-updateFormUI() becomes the single source of truth for UI rendering:
+The resulting rendering flow is:
 
+```text
 State transition
-      ↓
+       ↓
 transitionTo()
-      ↓
+       ↓
 updateFormUI()
-      ↓
+       ↓
 DOM update
-
-The redundant manual assignments:
-
-statusFeedback.textContent = "...";
-
-are removed from the try/catch block, preventing the unnecessary overwrite and keeping UI state management centralized.
+```
