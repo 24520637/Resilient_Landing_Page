@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Landing Page</title>
+</head>
+<body>
+    <a href="#main">Skip to Content</a>
+
+    <header>
+        <h1>Event Landing Page</h1>
+        <p>Join us for an upcoming event.</p>
+    </header>
+
+    <main id="main">
+        <section aria-labelledby="countdown-heading">
+            <h2 id="countdown-heading">Event Countdown</h2>
+
+            <div id="countdown-container">
+                <p>
+                    <span id="days">00</span> Days
+                </p>
+                <p>
+                    <span id="hours">00</span> Hours
+                </p>
+                <p>
+                    <span id="minutes">00</span> Minutes
+                </p>
+                <p>
+                    <span id="seconds">00</span> Seconds
+                </p>
+            </div>
+        </section>
+
+        <section aria-labelledby="registration-heading">
+            <h2 id="registration-heading">Registration</h2>
+
+            <form id="registration-form">
+                <div>
+                    <label for="name">Name</label>
+                    <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        autocomplete="name"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="message">Message</label>
+                    <textarea
+                        id="message"
+                        name="message"
+                        rows="5"
+                    ></textarea>
+                </div>
+
+                <button type="submit">Register</button>
+            </form>
+        </section>
+
+        <section aria-labelledby="status-heading">
+            <h2 id="status-heading">Status</h2>
+
+            <p
+                id="status-feedback"
+                role="status"
+                aria-live="polite"
+            >
+                Ready for registration.
+            </p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Event Landing Page</p>
+    </footer>
+</body>
+</html>
