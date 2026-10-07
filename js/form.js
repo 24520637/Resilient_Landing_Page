@@ -33,15 +33,27 @@ function updateFormUI() {
     submitButton.disabled = isSubmitting;
     submitButton.setAttribute("aria-disabled", String(isSubmitting));
 
-    if (isSubmitting) {
-        statusFeedback.textContent = "Submitting your registration...";
-        statusFeedback.setAttribute("role", "status");
-        statusFeedback.setAttribute("aria-live", "polite");
-        submitButton.textContent = "Submitting...";
-    } else if (currentFormState === FORM_STATES.IDLE) {
+
+    statusFeedback.classList.remove("status-error", "status-success", "status-submitting");
+
+    if (currentFormState === FORM_STATES.IDLE) {
         statusFeedback.textContent =
             "Complete the registration form to receive confirmation.";
         submitButton.textContent = "Register";
+    } else if (currentFormState === FORM_STATES.SUBMITTING) {
+        statusFeedback.textContent = "Submitting your registration...";
+        submitButton.textContent = "Submitting...";
+        statusFeedback.classList.add("status-submitting");
+    } else if (currentFormState === FORM_STATES.SUCCESS) {
+        statusFeedback.textContent =
+            "Registration submitted successfully.";
+        submitButton.textContent = "Register";
+        statusFeedback.classList.add("status-success"); // 👉 Thêm class success
+    } else if (currentFormState === FORM_STATES.ERROR) {
+        statusFeedback.textContent =
+            "Something went wrong. Please try again.";
+        submitButton.textContent = "Register";
+        statusFeedback.classList.add("status-error"); // 👉 Thêm class error
     }
 }
 
@@ -84,30 +96,30 @@ function mockApiSubmit(shouldSucceed = true) {
 }
 
 // ==========================================
-// THÊM ĐOẠN CODE FIX LỖI TẠI ĐÂY:
+// fixing
 // ==========================================
 if (registrationForm) {
-    registrationForm.addEventListener("submit", async (event) => {
-        event.preventDefault(); // Ngăn trang reload
+registrationForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-        // 1. Chuyển state sang SUBMITTING
-        transitionTo(FORM_STATES.SUBMITTING);
+    // 👉 ĐÂY LÀ ĐOẠN CẦN THÊM: Nếu đang ở SUCCESS hoặc ERROR thì reset về IDLE trước
+    if (currentFormState === FORM_STATES.SUCCESS || currentFormState === FORM_STATES.ERROR) {
+        transitionTo(FORM_STATES.IDLE);
+    }
 
-        try {
-            // Đổi thành mockApiSubmit(false) nếu muốn test trường hợp lỗi API
-            const response = await mockApiSubmit(true);
+    if (!transitionTo(FORM_STATES.SUBMITTING)) {
+        return;
+    }
 
-            // 2. Thành công -> Chuyển state sang SUCCESS
-            transitionTo(FORM_STATES.SUCCESS);
-            statusFeedback.textContent = response.message;
-
-        } catch (error) {
-            // 3. Thất bại -> Bắt lỗi êm đẹp, chuyển state sang ERROR (Không bị nổ Unhandled Rejection)
-            transitionTo(FORM_STATES.ERROR);
-            statusFeedback.textContent = "Registration failed. Please try again.";
-            console.error("Submission Error:", error.message);
-        }
-    });
+    try {
+        const result = await mockApiSubmit(true);
+        console.log("API success:", result);
+        transitionTo(FORM_STATES.SUCCESS);
+    } catch (error) {
+        console.error("API error:", error);
+        transitionTo(FORM_STATES.ERROR);
+    }
+});
 }
 
 // Khởi chạy UI ban đầu
@@ -115,8 +127,8 @@ updateFormUI();
 
 console.log("Initial form state:", currentFormState);
 
-// Expose ra window để test trong Console (Xóa hoặc comment lại sau khi test)
-window.FORM_STATES = FORM_STATES;
-window.transitionTo = transitionTo;
+// Expose ra window để test trong Console
+/*window.transitionTo = transitionTo;
 window.getFormState = getFormState;
-window.mockApiSubmit = mockApiSubmit;
+window.mockApiSubmit = mockApiSubmit;*/
+
