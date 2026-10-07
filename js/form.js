@@ -185,10 +185,16 @@ registrationForm.addEventListener("submit", async (event) => {
         console.log("API success:", result);
 
         transitionTo(FORM_STATES.SUCCESS);
+
+        statusFeedback.textContent =
+            "Registration submitted successfully.";
     } catch (error) {
         console.error("API error:", error);
 
         transitionTo(FORM_STATES.ERROR);
+
+        statusFeedback.textContent =
+            "Something went wrong. Please try again.";
     } finally {
         unlockSubmission();
     }
