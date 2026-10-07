@@ -68,6 +68,21 @@ function getFormState() {
     return currentFormState;
 }
 
+function mockApiSubmit(shouldSucceed = true) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (shouldSucceed) {
+                resolve({
+                    success: true,
+                    message: "Registration submitted successfully."
+                });
+            } else {
+                reject(new Error("Mock API request failed."));
+            }
+        }, 1500);
+    });
+}
+
 updateFormUI();
 
 console.log("Initial form state:", currentFormState);
@@ -75,3 +90,4 @@ console.log("Initial form state:", currentFormState);
 window.FORM_STATES = FORM_STATES;
 window.transitionTo = transitionTo;
 window.getFormState = getFormState;
+window.mockApiSubmit = mockApiSubmit;
