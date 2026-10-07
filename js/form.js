@@ -33,8 +33,10 @@ function updateFormUI() {
     submitButton.disabled = isSubmitting;
     submitButton.setAttribute("aria-disabled", String(isSubmitting));
 
-
-    statusFeedback.classList.remove("status-error", "status-success", "status-submitting");
+    statusFeedback.classList.remove(
+        "status-success",
+        "status-error"
+    );
 
     if (currentFormState === FORM_STATES.IDLE) {
         statusFeedback.textContent =
@@ -43,17 +45,16 @@ function updateFormUI() {
     } else if (currentFormState === FORM_STATES.SUBMITTING) {
         statusFeedback.textContent = "Submitting your registration...";
         submitButton.textContent = "Submitting...";
-        statusFeedback.classList.add("status-submitting");
     } else if (currentFormState === FORM_STATES.SUCCESS) {
         statusFeedback.textContent =
             "Registration submitted successfully.";
+        statusFeedback.classList.add("status-success");
         submitButton.textContent = "Register";
-        statusFeedback.classList.add("status-success"); // 👉 Thêm class success
     } else if (currentFormState === FORM_STATES.ERROR) {
         statusFeedback.textContent =
             "Something went wrong. Please try again.";
+        statusFeedback.classList.add("status-error");
         submitButton.textContent = "Register";
-        statusFeedback.classList.add("status-error"); // 👉 Thêm class error
     }
 }
 
@@ -95,15 +96,18 @@ function mockApiSubmit(shouldSucceed = true) {
     });
 }
 
-// ==========================================
-// fixing
-// ==========================================
-if (registrationForm) {
 registrationForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    // 👉 ĐÂY LÀ ĐOẠN CẦN THÊM: Nếu đang ở SUCCESS hoặc ERROR thì reset về IDLE trước
-    if (currentFormState === FORM_STATES.SUCCESS || currentFormState === FORM_STATES.ERROR) {
+    if (currentFormState === FORM_STATES.SUBMITTING) {
+        console.log("Duplicate submit event ignored.");
+        return;
+    }
+
+    if (
+        currentFormState === FORM_STATES.SUCCESS ||
+        currentFormState === FORM_STATES.ERROR
+    ) {
         transitionTo(FORM_STATES.IDLE);
     }
 
@@ -113,22 +117,23 @@ registrationForm.addEventListener("submit", async (event) => {
 
     try {
         const result = await mockApiSubmit(true);
+
         console.log("API success:", result);
+
         transitionTo(FORM_STATES.SUCCESS);
     } catch (error) {
         console.error("API error:", error);
+
         transitionTo(FORM_STATES.ERROR);
     }
 });
-}
 
-// Khởi chạy UI ban đầu
 updateFormUI();
 
 console.log("Initial form state:", currentFormState);
 
-// Expose ra window để test trong Console
-/*window.transitionTo = transitionTo;
+/*
+window.FORM_STATES = FORM_STATES;
+window.transitionTo = transitionTo;
 window.getFormState = getFormState;
 window.mockApiSubmit = mockApiSubmit;*/
-
