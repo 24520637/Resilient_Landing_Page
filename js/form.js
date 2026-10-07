@@ -83,10 +83,39 @@ function mockApiSubmit(shouldSucceed = true) {
     });
 }
 
+// ==========================================
+// THÊM ĐOẠN CODE FIX LỖI TẠI ĐÂY:
+// ==========================================
+if (registrationForm) {
+    registrationForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); // Ngăn trang reload
+
+        // 1. Chuyển state sang SUBMITTING
+        transitionTo(FORM_STATES.SUBMITTING);
+
+        try {
+            // Đổi thành mockApiSubmit(false) nếu muốn test trường hợp lỗi API
+            const response = await mockApiSubmit(true);
+
+            // 2. Thành công -> Chuyển state sang SUCCESS
+            transitionTo(FORM_STATES.SUCCESS);
+            statusFeedback.textContent = response.message;
+
+        } catch (error) {
+            // 3. Thất bại -> Bắt lỗi êm đẹp, chuyển state sang ERROR (Không bị nổ Unhandled Rejection)
+            transitionTo(FORM_STATES.ERROR);
+            statusFeedback.textContent = "Registration failed. Please try again.";
+            console.error("Submission Error:", error.message);
+        }
+    });
+}
+
+// Khởi chạy UI ban đầu
 updateFormUI();
 
 console.log("Initial form state:", currentFormState);
 
+// Expose ra window để test trong Console (Xóa hoặc comment lại sau khi test)
 window.FORM_STATES = FORM_STATES;
 window.transitionTo = transitionTo;
 window.getFormState = getFormState;
