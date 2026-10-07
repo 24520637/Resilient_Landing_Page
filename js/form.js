@@ -21,7 +21,18 @@ const VALID_TRANSITIONS = {
     ]
 };
 
+const submissionContract = {
+    state: FORM_STATES.IDLE,
+    locked: false,
+    input: {
+        name: "",
+        email: "",
+        message: ""
+    }
+};
+
 let currentFormState = FORM_STATES.IDLE;
+let isLocked = false;
 
 const registrationForm = document.getElementById("registration-form");
 const submitButton = registrationForm.querySelector("button[type='submit']");
@@ -30,8 +41,11 @@ const statusFeedback = document.getElementById("status-feedback");
 function updateFormUI() {
     const isSubmitting = currentFormState === FORM_STATES.SUBMITTING;
 
-    submitButton.disabled = isSubmitting;
-    submitButton.setAttribute("aria-disabled", String(isSubmitting));
+    submitButton.disabled = isSubmitting || isLocked;
+    submitButton.setAttribute(
+        "aria-disabled",
+        String(isSubmitting || isLocked)
+    );
 
     statusFeedback.classList.remove(
         "status-success",
@@ -69,6 +83,7 @@ function transitionTo(nextState) {
     }
 
     currentFormState = nextState;
+    submissionContract.state = currentFormState;
 
     updateFormUI();
 
@@ -77,8 +92,30 @@ function transitionTo(nextState) {
     return true;
 }
 
+function lockSubmission() {
+    isLocked = true;
+    submissionContract.locked = true;
+
+    updateFormUI();
+
+    console.log("Submission locked:", isLocked);
+}
+
+function unlockSubmission() {
+    isLocked = false;
+    submissionContract.locked = false;
+
+    updateFormUI();
+
+    console.log("Submission unlocked:", isLocked);
+}
+
 function getFormState() {
     return currentFormState;
+}
+
+function getSubmissionLock() {
+    return isLocked;
 }
 
 function mockApiSubmit(shouldSucceed = true) {
@@ -99,8 +136,8 @@ function mockApiSubmit(shouldSucceed = true) {
 registrationForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    if (currentFormState === FORM_STATES.SUBMITTING) {
-        console.log("Duplicate submit event ignored.");
+    if (isLocked) {
+        console.log("Submit event ignored because submission is locked.");
         return;
     }
 
@@ -115,6 +152,8 @@ registrationForm.addEventListener("submit", async (event) => {
         return;
     }
 
+    lockSubmission();
+
     try {
         const result = await mockApiSubmit(true);
 
@@ -125,15 +164,22 @@ registrationForm.addEventListener("submit", async (event) => {
         console.error("API error:", error);
 
         transitionTo(FORM_STATES.ERROR);
+    } finally {
+        unlockSubmission();
     }
 });
 
 updateFormUI();
 
 console.log("Initial form state:", currentFormState);
+console.log("Initial submission lock:", isLocked);
 
 /*
 window.FORM_STATES = FORM_STATES;
+window.submissionContract = submissionContract;
 window.transitionTo = transitionTo;
 window.getFormState = getFormState;
-window.mockApiSubmit = mockApiSubmit;*/
+window.getSubmissionLock = getSubmissionLock;
+window.mockApiSubmit = mockApiSubmit;
+window.lockSubmission = lockSubmission;
+window.unlockSubmission = unlockSubmission;*/
